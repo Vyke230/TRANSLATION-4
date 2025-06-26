@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Professional Technical Translator</title>
+  <style>
+    :root {
+      --primary: #2c3e50;
+      --secondary: #3498db;
+      --light: #ecf0f1;
+      --dark: #34495e;
+    }
+    
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      padding: 2rem; 
+      background-color: #f8f9fa;
+      color: #333;
+    }
+    
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 8px 8px 0 0;
+      margin-bottom: 1.5rem;
+    }
+    
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    
+    .panel {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    textarea, select, input {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: inherit;
+    }
+    
+    textarea { 
+      height: 150px; 
+      resize: vertical;
+    }
+    
+    button {
+      background: var(--secondary);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s;
+    }
+    
+    button:hover {
+      background: #2980b9;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    
+    pre { 
+      background: var(--light); 
+      padding: 1.5rem; 
+      border-radius: 4px;
+      white-space: pre-wrap;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .translation-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    
+    .translation-box {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1rem;
+      background: white;
+    }
+    
+    h2 {
+      color: var(--primary);
+      border-bottom: 2px solid var(--secondary);
+      padding-bottom: 0.5rem;
+      margin-top: 0;
+    }
+    
+    .tag {
+      display: inline-block;
+      background: #e0f7fa;
+      color: #006064;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      margin-right: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Professional Technical Translator</h1>
+    <p>Specialized translation for technical documents with terminology management</p>
+  </header>
+  
+  <div class="container">
+    <div class="input-section">
+      <div class="panel">
+        <h2>Source Content</h2>
+        <label for="sourceText">Text to Translate:</label>
+        <textarea id="sourceText" placeholder="Paste technical content here..."></textarea>
+        
+        <div class="btn-group">
+          <div>
+            <label for="sourceLang">Source Language:</label>
+            <select id="sourceLang">
+              <option value="EN">English</option>
+              <option value="FR">French</option>
+              <option value="DE">German</option>
+              <option value="ES">Spanish</option>
+            </select>
+          </div>
+          
+          <div>
+            <label for="targetLang">Target Language:</label>
+            <select id="targetLang">
+              <option value="FR">French</option>
+              <option value="EN">English</option>
+              <option value="DE">German</option>
+              <option value="ES">Spanish</option>
+            </select>
+          </div>
+        </div>
+        
+        <button onclick="translate()">Translate Document</button>
+      </div>
+      
+      <div class="panel">
+        <h2>Terminology Management</h2>
+        
+        <div class="btn-group">
+          <div>
+            <label for="glossaryFile">Upload Glossary (CSV):</label>
+            <input type="file" id="glossaryFile" accept=".csv" />
+            <button onclick="uploadGlossary()">Upload</button>
+          </div>
+          
+          <button onclick="clearGlossary()">Clear Glossary</button>
+        </div>
+        
+        <h3>Current Glossary Terms</h3>
+        <pre id="glossaryPreview">No glossary terms loaded</pre>
+      </div>
+    </div>
+    
+    <div class="output-section">
+      <div class="panel">
+        <h2>Translation Results</h2>
+        <div class="translation-container">
+          <div class="translation-box">
+            <h3><span class="tag">AI-Powered</span> GPT-4o</h3>
+            <pre id="gpt">Translation will appear here</pre>
+          </div>
+          <div class="translation-box">
+            <h3><span class="tag">Neural</span> DeepSeek</h3>
+            <pre id="deepseek">Translation will appear here</pre>
+          </div>
+          <div class="translation-box">
+            <h3><span class="tag">Professional</span> DeepL</h3>
+            <pre id="deepl">Translation will appear here</pre>
+          </div>
+        </div>
+      </div>
+      
+      <div class="panel">
+        <h2>Translation Analysis</h2>
+        <h3>Domain & Terminology</h3>
+        <pre id="domainInfo">Domain detection results will appear here</pre>
+        
+        <h3>Decision Log & Justifications</h3>
+        <pre id="notes">Translation notes and decisions will appear here</pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let glossary = [];
+    let currentDomain = "Not detected";
+
+    function uploadGlossary() {
+      const fileInput = document.getElementById("glossaryFile");
+      const file = fileInput.files[0];
+      if (!file) return alert("Please select a glossary file");
+      
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const csv = reader.result;
+          const lines = csv.split("\n");
+          glossary = lines
+            .filter(line => line.trim())
+            .map(line => {
+              const [term, translation] = line.split(",");
+              return [term.trim(), translation.trim()];
+            })
+            .filter(([term, trans]) => term && trans);
+
+          updateGlossaryPreview();
+        } catch (error) {
+          alert("Invalid glossary format. Please use CSV format: term,translation");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function clearGlossary() {
+      glossary = [];
+      updateGlossaryPreview();
+    }
+
+    function updateGlossaryPreview() {
+      const preview = document.getElementById("glossaryPreview");
+      if (glossary.length === 0) {
+        preview.textContent = "No glossary terms loaded";
+        return;
+      }
+      
+      preview.textContent = glossary.map(([term, trans]) => 
+        `${term} → ${trans}`
+      ).join("\n");
+    }
+
+    async function translate() {
+      const text = document.getElementById("sourceText").value;
+      if (!text.trim()) return alert("Please enter text to translate");
+      
+      const source_lang = document.getElementById("sourceLang").value;
+      const target_lang = document.getElementById("targetLang").value;
+      
+      // Show loading states
+      document.getElementById("gpt").textContent = "Translating...";
+      document.getElementById("deepseek").textContent = "Translating...";
+      document.getElementById("deepl").textContent = "Translating...";
+      document.getElementById("notes").textContent = "Analyzing document...";
+      
+      try {
+        const response = await fetch("/api/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, source_lang, target_lang, glossary })
+        });
+
+        if (!response.ok) throw new Error("Translation failed");
+        
+        const data = await response.json();
+        
+        // Update UI with results
+        document.getElementById("gpt").textContent = data.gpt || "No translation";
+        document.getElementById("deepseek").textContent = data.deepseek || "No translation";
+        document.getElementById("deepl").textContent = data.deepl || "No translation";
+        document.getElementById("notes").textContent = data.notes || "No notes available";
+        
+        // Extract domain from notes
+        const domainMatch = data.notes.match(/Detected Domain: (.+)/);
+        if (domainMatch) {
+          document.getElementById("domainInfo").textContent = `Document Domain: ${domainMatch[1]}`;
+        }
+      } catch (error) {
+        document.getElementById("notes").textContent = `Error: ${error.message}`;
+      }
+    }
+    
+    // Initialize glossary display
+    updateGlossaryPreview();
+  </script>
+</body>
+</html>
